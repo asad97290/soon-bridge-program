@@ -25,6 +25,9 @@ ethabi = "18.0.0"
 keccak-hash = "0.10.0"
 spl-token = { version = "6.0.0", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "4.0.0", features = ["no-entrypoint"] }
+solana-sdk = "2.1.7"
+solana-program-test = "2.1.7"
+tokio = "1.43.0"
 
 [lib]
 name = "bridge"

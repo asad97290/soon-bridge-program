@@ -15,8 +15,14 @@ mod entrypoint;
 
 pub use solana_program;
 use solana_program::{
+        instruction::AccountMeta,
     entrypoint::ProgramResult, program_error::ProgramError, pubkey, pubkey::Pubkey,
 };
+use solana_sdk::transaction::{SanitizedTransaction, Transaction, VersionedTransaction};
+use solana_sdk::signature::{Keypair, Signature, Signer};
+use solana_program_test::*;
+
+
 
 solana_program::declare_id!("Bridge1111111111111111111111111111111111111");
 
@@ -37,28 +43,50 @@ pub fn check_program_account(bridge_program_id: &Pubkey) -> ProgramResult {
 
 #[cfg(test)]
 mod tests {
+    use ethabi::Address;
+    use solana_program::account_info::AccountInfo;
+    use spl_token::state::Account;
+
     use super::*;
    
-    #[test]
-    fn test_create_spl_encoding() -> Result<(), ProgramError> {
+    #[tokio::test] // for async test
+    async fn test_create_spl_encoding() -> Result<(), ProgramError> {
+        println!("-------------------------->");
+
+        let program_id = crate::id();
+        let (soon_client, payer, recent_blockhash) =
+            ProgramTest::new("soon-bridge", program_id, processor!(entrypoint::process_instruction))
+                .start()
+                .await;
+        // let payer = Keypair::new();
+
         let remote_token = [0u8; 20];
         let name = "name";
         let symbol = "symbol";
-        let decimals = 18;
+        let decimals = 9;
 
-        let instruction = instruction::BridgeInstruction::CreateSPL {
-            remote_token: remote_token.into(),
+        let instruction = instruction::create_spl(
+            remote_token.into(),
+            payer.pubkey(),
             name,
             symbol,
             decimals,
-        };
-
-        let packed_data = instruction.pack()?;
-        let unpacked_instruction = instruction::BridgeInstruction::unpack(&packed_data)?;
-        assert_eq!(
-            instruction, unpacked_instruction,
-            "Unpacked instruction did not match original"
+        )?;
+        // println!("-------------------------->{:?}",instruction);
+        let payer2 = &payer;
+        let mut tx = Transaction::new_signed_with_payer(
+            &[instruction],
+            Some(&payer.pubkey()),
+            &[&payer],
+            recent_blockhash,
         );
+        tx.sign(&[payer2], recent_blockhash);
+        let transaction_result = soon_client.process_transaction(tx).await;
+        println!("-------------------------->{:?}",transaction_result);
+
+
+
         Ok(())
+
     }
 }

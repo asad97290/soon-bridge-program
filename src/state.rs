@@ -331,7 +331,9 @@ impl Pack for BridgeOwner {
     }
 
     fn unpack_from_slice(src: &[u8]) -> Result<Self, ProgramError> {
-        let admin = Pubkey::try_from(src).map_err(|_| ProgramError::InvalidAccountData)?;
-        Ok(Self { admin })
+        
+        println!("===========create_spl============");
+        // let admin = Pubkey::try_from(src).map_err(|_| ProgramError::InvalidAccountData)?;
+        Ok(Self{admin:Pubkey::new_unique()})
     }
 }

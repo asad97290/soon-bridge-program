@@ -301,50 +301,51 @@ impl Processor {
             vault_account,                // write
             bridge_owner_account,         // read
             admin_account,                // read,signer
-        ] = accounts;
-
-        check_program_account(spl_token_program_account.key)
+            ] = accounts;
+            
+            check_program_account(spl_token_program_account.key)
             .map_err(|_| BridgeError::InvalidSPLTokenProgramId)?;
-
+        
         /*
         if !Self::cmp_pubkeys(&mpl_token_metadata_account.key, &MPL_TOKEN_METADATA_ID) {
             return Err(BridgeError::InvalidMPLTokenMetadataAccount.into());
-        }
-
-        // TODO:
-        // check metadata account
-        // address=find_metadata_account(&index_token_mint.key()).0
-         */
-
-        // Ensure provided vault key is the right derived address
-        let (vault_key, vault_bump) = vault_pubkey_and_bump(program_id);
-        if !Self::cmp_pubkeys(&vault_key, vault_account.key) {
-            return Err(BridgeError::InvalidVaultAccount.into());
-        }
-
-        // Check bridge owner account and admin
-        let (bridge_owner_key, _) = bridge_owner_pubkey_and_bump(program_id);
-        if !Self::cmp_pubkeys(&bridge_owner_key, bridge_owner_account.key) {
-            return Err(BridgeError::InvalidBridgeOwnerAccount.into());
-        }
-        let bridge_owner = BridgeOwner::unpack(&bridge_owner_account.data.borrow())?;
-        if bridge_owner.admin != *admin_account.key || !admin_account.is_signer {
-            return Err(BridgeError::InvalidAdmin.into());
-        }
-
-        // Create SPL token owner
-        let (spl_token_owner_key, _) = spl_token_owner_pubkey_and_bump(&remote_token, program_id);
-        if !Self::cmp_pubkeys(&spl_token_owner_key, spl_token_owner_account.key) {
-            return Err(BridgeError::InvalidSPLTokenOwnerAccount.into());
-        }
-
-        // Create & init SPL token mint
-        let (spl_token_mint_key, spl_token_mint_bump) =
+            }
+            
+            // TODO:
+            // check metadata account
+            // address=find_metadata_account(&index_token_mint.key()).0
+            */
+            
+            // Ensure provided vault key is the right derived address
+            let (vault_key, vault_bump) = vault_pubkey_and_bump(program_id);
+            if !Self::cmp_pubkeys(&vault_key, vault_account.key) {
+                return Err(BridgeError::InvalidVaultAccount.into());
+            }
+            
+            // Check bridge owner account and admin
+            let (bridge_owner_key, _) = bridge_owner_pubkey_and_bump(program_id);
+            if !Self::cmp_pubkeys(&bridge_owner_key, bridge_owner_account.key) {
+                return Err(BridgeError::InvalidBridgeOwnerAccount.into());
+            }
+            println!("===========create_spl============{:?},{:?}",bridge_owner_key,bridge_owner_account.key);
+            let bridge_owner = BridgeOwner::unpack(&bridge_owner_account.data.borrow())?;
+            if bridge_owner.admin != *admin_account.key || !admin_account.is_signer {
+                return Err(BridgeError::InvalidAdmin.into());
+            }
+            
+            // Create SPL token owner
+            let (spl_token_owner_key, _) = spl_token_owner_pubkey_and_bump(&remote_token, program_id);
+            if !Self::cmp_pubkeys(&spl_token_owner_key, spl_token_owner_account.key) {
+                return Err(BridgeError::InvalidSPLTokenOwnerAccount.into());
+            }
+            
+            // Create & init SPL token mint
+            let (spl_token_mint_key, spl_token_mint_bump) =
             spl_token_mint_pubkey_and_bump(&remote_token, program_id);
-        if !Self::cmp_pubkeys(&spl_token_mint_key, spl_token_mint_account.key) {
-            return Err(BridgeError::InvalidSPLTokenMintAccount.into());
-        }
-
+            if !Self::cmp_pubkeys(&spl_token_mint_key, spl_token_mint_account.key) {
+                return Err(BridgeError::InvalidSPLTokenMintAccount.into());
+            }
+            
         let rent = Rent::from_account_info(rent_sysvar_account)?;
         let instruction = create_account(
             vault_account.key,
