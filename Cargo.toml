@@ -25,18 +25,10 @@ ethabi = "18.0.0"
 keccak-hash = "0.10.0"
 spl-token = { version = "6.0.0", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "4.0.0", features = ["no-entrypoint"] }
-tokio = "1.43.0"
-solana-program-test = "1.18.26"
-solana-sdk = "1.18.26"
 
 [lib]
 name = "bridge"
 crate-type = ["cdylib", "lib"]
-
-[dev-dependencies]
-solana-program-test = "1.18.26"
-solana-sdk = "1.18.26"
-tokio = "1.43.0"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

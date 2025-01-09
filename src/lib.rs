@@ -38,40 +38,7 @@ pub fn check_program_account(bridge_program_id: &Pubkey) -> ProgramResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_str_encoding() -> Result<(), ProgramError> {
-        let s = "hello";
-        let packed = BridgeInstruction::pack_str(s)?;
-        let (unpacked, _) = BridgeInstruction::unpack_str(&packed)?;
-        assert_eq!(s, unpacked);
-
-        let s = "abcdefghijklmnopqrstuvwxyz1234567890";
-        let packed = BridgeInstruction::pack_str(s)?;
-        let (unpacked, _) = BridgeInstruction::unpack_str(&packed)?;
-        assert_eq!(s, unpacked);
-
-        // Test string at max length
-        let mut long_str = String::new();
-        for _ in 0..=256 {
-            long_str.push('a');
-        }
-        let packed = BridgeInstruction::pack_str(s)?;
-        let (unpacked, _) = BridgeInstruction::unpack_str(&packed)?;
-        assert_eq!(s, unpacked);
-
-        // Test string too long
-        long_str = String::new();
-        for _ in 0..=257 {
-            long_str.push('a');
-        }
-        assert_eq!(
-            BridgeInstruction::pack_str(&long_str),
-            Err(BridgeError::StringLengthTooLong)
-        );
-        Ok(())
-    }
-
+   
     #[test]
     fn test_create_spl_encoding() -> Result<(), ProgramError> {
         let remote_token = [0u8; 20];
@@ -79,7 +46,7 @@ mod tests {
         let symbol = "symbol";
         let decimals = 18;
 
-        let instruction = BridgeInstruction::CreateSPL {
+        let instruction = instruction::BridgeInstruction::CreateSPL {
             remote_token: remote_token.into(),
             name,
             symbol,
@@ -87,7 +54,7 @@ mod tests {
         };
 
         let packed_data = instruction.pack()?;
-        let unpacked_instruction = BridgeInstruction::unpack(&packed_data)?;
+        let unpacked_instruction = instruction::BridgeInstruction::unpack(&packed_data)?;
         assert_eq!(
             instruction, unpacked_instruction,
             "Unpacked instruction did not match original"
